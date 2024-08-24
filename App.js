@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 export default function App() {
   const [loading, setLoading] = useState(true);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //   }, 4000);
-  // }, []);
+  useEffect(() => {
+    //simulate API call
+    setTimeout(() => {
+      setLoading(false);
+    }, 4000);
+  }, []);
 
   return (
     <View style={styles.container}>

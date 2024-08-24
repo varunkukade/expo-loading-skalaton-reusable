@@ -25,11 +25,33 @@ export const SkalatonLoader = ({
   backgroundColor = "#F0F8FF",
   direction = ANIMATION_DIRECTION.leftToRight,
 }) => {
+  const isXDirectionAnimation =
+    direction === ANIMATION_DIRECTION.leftToRight ||
+    direction === ANIMATION_DIRECTION.rightToLeft;
+
+  const isYDirectionAnimation =
+    direction === ANIMATION_DIRECTION.topToBottom ||
+    direction === ANIMATION_DIRECTION.bottomToTop;
+
+  //to move the gradient view across x direction
   const translatex = useSharedValue(0);
 
-  const [gradientWidth, setGradientWidth] = useState(-1);
-  const [parentWidth, setParentWidth] = useState(-1);
+  //to move the gradient view across y direction
+  const translatey = useSharedValue(0);
 
+  //track dimensions of child (gradient view) for deciding movable boundaries
+  const [gradientDimensions, setGradientDimensions] = useState({
+    height: -1,
+    width: -1,
+  });
+
+  //track dimensions of parent view (parent of gradient view) for deciding movable boundaries
+  const [parentDimensions, setParentDimensions] = useState({
+    height: -1,
+    width: -1,
+  });
+
+  //to toggle between different direction of move
   const [coordinates, setCoordinates] = useState({
     start: { x: 0, y: 0 },
     end: { x: 1, y: 0 },
@@ -67,7 +89,7 @@ export const SkalatonLoader = ({
     }
   }, [direction]);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const animatedStyleX = useAnimatedStyle(() => {
     return {
       transform: [
         {
@@ -77,66 +99,171 @@ export const SkalatonLoader = ({
     };
   });
 
-  useEffect(() => {
-    if (parentWidth !== -1 && gradientWidth !== -1 && direction) {
-      const leftMostEnd = -(parentWidth * 0.75);
-      const rightMostEnd = parentWidth - gradientWidth + parentWidth * 0.75;
-      translatex.value =
-        direction === ANIMATION_DIRECTION.leftToRight
-          ? leftMostEnd
-          : rightMostEnd;
-      translatex.value = withRepeat(
-        withSequence(
-          withTiming(
-            direction === ANIMATION_DIRECTION.leftToRight
-              ? rightMostEnd
-              : leftMostEnd,
-            {
-              duration: 500,
-              easing: Easing.linear,
-            }
-          ),
-          withDelay(
-            800, // Delay before the animation restarts
-            withTiming(0, {
-              duration: 0,
-            })
-          )
+  const animatedStyleY = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: translatey.value,
+        },
+      ],
+    };
+  });
+
+  const animateAcrossXDirection = () => {
+    /*
+    We need overflowOffset because we start moving animation little bit before actual start
+    Also we end moving animation little bit after actual end.
+    We hide those overflowed views using overflow: "hidden" style on parent view
+    */
+    const overflowOffset = parentDimensions.width * 0.75;
+
+    /*
+    In case of leftToRight direction, we start animation from leftMostEnd
+    In case of rightToLeft direction, we stop animation at leftMostEnd
+    */
+    const leftMostEnd = -overflowOffset;
+
+    /*
+    In case of leftToRight direction, we stop animation at rightMostEnd
+    In case of rightToLeft direction, we start animation at rightMostEnd
+    We subtract gradientDimensions.width because animation should end (in case of leftToRight)/start(in case of rightToLeft) 
+     when leftmost end of gradient view touches the right most end of parent view
+    */
+    const rightMostEnd =
+      parentDimensions.width - gradientDimensions.width + overflowOffset;
+    translatex.value =
+      direction === ANIMATION_DIRECTION.leftToRight
+        ? leftMostEnd
+        : rightMostEnd;
+    translatex.value = withRepeat(
+      withSequence(
+        withTiming(
+          direction === ANIMATION_DIRECTION.leftToRight
+            ? rightMostEnd
+            : leftMostEnd,
+          {
+            duration: 500,
+            easing: Easing.linear,
+          }
         ),
-        -1, // Repeat indefinitely
-        false // Do not reverse
-      );
+        withDelay(
+          800, // Delay before the next iteration of animation starts
+          withTiming(0, {
+            duration: 0,
+          })
+        )
+      ),
+      -1, // Repeat inifinite times
+      false // Do not reverse the animation
+    );
+  };
+
+  const animateAcrossYDirection = () => {
+    /*
+    We need overflowOffset because we start moving animation little bit before actual start
+    Also we end moving animation little bit after actual end.
+    We hide those overflowed views using overflow: "hidden" style on parent view
+    */
+    const overflowOffset = parentDimensions.height * 0.75;
+
+    /*
+    In case of topToBottom direction, we start animation from topMostEnd
+    In case of bottomToTop direction, we stop animation at topMostEnd
+    */
+    const topMostEnd = -overflowOffset;
+
+    /*
+    In case of topToBottom direction, we stop animation at bottomMostEnd
+    In case of bottomToTop direction, we start animation at bottomMostEnd
+    We subtract gradientDimensions.height because animation should end (in case of topToBottom)/start(in case of bottomToTop) 
+     when topmost end of gradient view touches the bottom most end of parent view
+    */
+    const bottomMostEnd =
+      parentDimensions.height - gradientDimensions.height + overflowOffset;
+    translatey.value =
+      direction === ANIMATION_DIRECTION.topToBottom
+        ? topMostEnd
+        : bottomMostEnd;
+    translatey.value = withRepeat(
+      withSequence(
+        withTiming(
+          direction === ANIMATION_DIRECTION.topToBottom
+            ? bottomMostEnd
+            : topMostEnd,
+          {
+            duration: 500,
+            easing: Easing.linear,
+          }
+        ),
+        withDelay(
+          800, // Delay before the animation restarts
+          withTiming(0, {
+            duration: 0,
+          })
+        )
+      ),
+      -1, // Repeat indefinitely
+      false // Do not reverse
+    );
+  };
+
+  useEffect(() => {
+    if (
+      parentDimensions.height !== -1 &&
+      parentDimensions.width !== -1 &&
+      gradientDimensions.height !== -1 &&
+      gradientDimensions.width !== -1 &&
+      direction
+    ) {
+      if (isXDirectionAnimation) {
+        animateAcrossXDirection();
+      } else {
+        animateAcrossYDirection();
+      }
     }
-  }, [parentWidth, gradientWidth, direction]);
+  }, [parentDimensions, gradientDimensions, direction, isXDirectionAnimation]);
 
   return (
     <View
       onLayout={(event) => {
-        if (parentWidth === -1) {
-          setParentWidth(event.nativeEvent.layout.width);
+        if (parentDimensions.height === -1 && parentDimensions.width === -1) {
+          setParentDimensions({
+            width: event.nativeEvent.layout.width,
+            height: event.nativeEvent.layout.height,
+          });
         }
       }}
       style={[styles.itemParent, { height, width, backgroundColor }, style]}
     >
       <Animated.View
         onLayout={(event) => {
-          if (gradientWidth === -1) {
-            setGradientWidth(event.nativeEvent.layout.width);
+          if (
+            gradientDimensions.width === -1 &&
+            gradientDimensions.height === -1
+          ) {
+            setGradientDimensions({
+              width: event.nativeEvent.layout.width,
+              height: event.nativeEvent.layout.height,
+            });
           }
         }}
         style={[
           styles.gradientParent,
-          animatedStyle,
-          { height: "100%", width: "70%" },
+          isXDirectionAnimation && animatedStyleX,
+          isXDirectionAnimation && { height: "100%", width: "80%" },
+          isYDirectionAnimation && animatedStyleY,
+          isYDirectionAnimation && { height: "80%", width: "100%" },
         ]}
       >
         <LinearGradient
           colors={[
             "rgba(255,255,255,0)",
             "rgba(255,255,255,0.1)",
+            "rgba(255,255,255,0.4)",
             "rgba(255,255,255,0.6)",
             "rgba(255,255,255,0.7)",
             "rgba(255,255,255,0.6)",
+            "rgba(255,255,255,0.4)",
             "rgba(255,255,255,0.1)",
             "rgba(255,255,255,0)",
           ]}
