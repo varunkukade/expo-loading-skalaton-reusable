@@ -27,17 +27,14 @@ export default function App() {
                 style={{ marginRight: 20, borderRadius: 10 }}
                 width={"70%"}
                 height={50}
-                direction={ANIMATION_DIRECTION.leftToRight}
               />
               <SkeletonLoader
                 style={{ borderRadius: 50 }}
                 width={50}
                 height={50}
-                direction={ANIMATION_DIRECTION.leftToRight}
               />
             </View>
             <SkeletonLoader
-              direction={ANIMATION_DIRECTION.leftToRight}
               width={"95%"}
               style={{ borderRadius: 10 }}
               height={100}

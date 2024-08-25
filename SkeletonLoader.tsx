@@ -204,7 +204,8 @@ export const SkeletonLoader = ({
         ? topMostEnd
         : bottomMostEnd;
     translatey.value = withRepeat(
-      withSequence(
+      withDelay(
+        800, //Delay before the next iteration of animation starts
         withTiming(
           direction === ANIMATION_DIRECTION.topToBottom
             ? bottomMostEnd
@@ -213,16 +214,9 @@ export const SkeletonLoader = ({
             duration: 500,
             easing: Easing.linear,
           }
-        ),
-        withDelay(
-          800, // Delay before the animation restarts
-          withTiming(0, {
-            duration: 0,
-          })
         )
       ),
-      -1, // Repeat indefinitely
-      false // Do not reverse
+      -1
     );
   };
 
@@ -299,7 +293,7 @@ export const SkeletonLoader = ({
               width: "80%",
             },
             isYDirectionAnimation && animatedStyleY,
-            isYDirectionAnimation && { height: "80%", width: "100%" },
+            isYDirectionAnimation && { height: "100%", width: "100%" },
           ]}
         >
           <LinearGradient
