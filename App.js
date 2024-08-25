@@ -1,6 +1,10 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, Image } from "react-native";
-import { ANIMATION_DIRECTION, SkalatonLoader } from "./SkalatonLoader";
+import {
+  ANIMATION_DIRECTION,
+  ANIMATION_TYPE,
+  SkeletonLoader,
+} from "./SkeletonLoader";
 import { useEffect, useState } from "react";
 
 export default function App() {
@@ -8,8 +12,8 @@ export default function App() {
 
   useEffect(() => {
     //simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    setInterval(() => {
+      setLoading((prevLoading) => !prevLoading);
     }, 4000);
   }, []);
 
@@ -19,22 +23,23 @@ export default function App() {
         {loading ? (
           <>
             <View style={styles.row}>
-              <SkalatonLoader
-                style={{ marginRight: 20 }}
+              <SkeletonLoader
+                style={{ marginRight: 20, borderRadius: 10 }}
                 width={"70%"}
                 height={50}
                 direction={ANIMATION_DIRECTION.leftToRight}
               />
-              <SkalatonLoader
+              <SkeletonLoader
                 style={{ borderRadius: 50 }}
                 width={50}
                 height={50}
                 direction={ANIMATION_DIRECTION.leftToRight}
               />
             </View>
-            <SkalatonLoader
+            <SkeletonLoader
               direction={ANIMATION_DIRECTION.leftToRight}
               width={"95%"}
+              style={{ borderRadius: 10 }}
               height={100}
             />
           </>
@@ -42,9 +47,14 @@ export default function App() {
           <>
             <View style={styles.row}>
               <Text
-                style={{ fontSize: 25, fontWeight: "700", marginRight: 20 }}
+                style={{
+                  fontSize: 25,
+                  fontWeight: "700",
+                  marginRight: 20,
+                  color: "black",
+                }}
               >
-                SkalatonLoader
+                SkeletonLoader
               </Text>
               <Image
                 style={{ height: 50, width: 50, borderRadius: 25 }}
@@ -53,7 +63,7 @@ export default function App() {
                 }}
               />
             </View>
-            <Text style={{ fontSize: 15 }}>
+            <Text style={{ fontSize: 15, color: "black" }}>
               Expo is a free and open-source platform for building apps with
               React Native. It simplifies the development process by providing
               tools, libraries, and services to streamline the creation of
@@ -90,7 +100,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     justifyContent: "center",
-    zIndex: 101,
     paddingHorizontal: 24,
   },
 });

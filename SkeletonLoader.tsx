@@ -1,7 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useSharedValue,
@@ -18,12 +19,18 @@ export enum ANIMATION_DIRECTION {
   bottomToTop = "bottomToTop",
 }
 
-export const SkalatonLoader = ({
+export enum ANIMATION_TYPE {
+  shiver = "shiver",
+  pulse = "pulse",
+}
+
+export const SkeletonLoader = ({
   height,
   width,
   style = {},
-  backgroundColor = "#F0F8FF",
+  backgroundColor = "#DDEAF5",
   direction = ANIMATION_DIRECTION.leftToRight,
+  animationType = ANIMATION_TYPE.shiver,
 }) => {
   const isXDirectionAnimation =
     direction === ANIMATION_DIRECTION.leftToRight ||
@@ -38,6 +45,9 @@ export const SkalatonLoader = ({
 
   //to move the gradient view across y direction
   const translatey = useSharedValue(0);
+
+  //to create pulse animation by increasing and decreasing opacity of parent
+  const opacity = useSharedValue(1);
 
   //track dimensions of child (gradient view) for deciding movable boundaries
   const [gradientDimensions, setGradientDimensions] = useState({
@@ -56,6 +66,15 @@ export const SkalatonLoader = ({
     start: { x: 0, y: 0 },
     end: { x: 1, y: 0 },
   });
+
+  useEffect(() => {
+    return () => {
+      //cancel running animations after component unmounts
+      cancelAnimation(translatex);
+      cancelAnimation(translatey);
+      cancelAnimation(opacity);
+    };
+  }, []);
 
   useEffect(() => {
     if (!direction) return;
@@ -109,11 +128,17 @@ export const SkalatonLoader = ({
     };
   });
 
+  const animatedStyleParent = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
+
   const animateAcrossXDirection = () => {
     /*
     We need overflowOffset because we start moving animation little bit before actual start
     Also we end moving animation little bit after actual end.
-    We hide those overflowed views using overflow: "hidden" style on parent view
+    We hide those overflowed views using overflow: "hidden" on parent view
     */
     const overflowOffset = parentDimensions.width * 0.75;
 
@@ -217,72 +242,94 @@ export const SkalatonLoader = ({
     }
   }, [parentDimensions, gradientDimensions, direction, isXDirectionAnimation]);
 
+  useEffect(() => {
+    if (animationType !== ANIMATION_TYPE.pulse) {
+      return;
+    }
+    //create pulse effect by repeating opacity animation
+    opacity.value = withRepeat(
+      withTiming(0.4, {
+        duration: 1000,
+        easing: Easing.linear,
+      }),
+      -1,
+      true
+    );
+  }, []);
+
   return (
-    <View
+    <Animated.View
       onLayout={(event) => {
-        if (parentDimensions.height === -1 && parentDimensions.width === -1) {
+        if (
+          parentDimensions.height === -1 &&
+          parentDimensions.width === -1 &&
+          animationType === ANIMATION_TYPE.shiver
+        ) {
+          //only in case of shiver animation, find out the width and height of parent view.
           setParentDimensions({
             width: event.nativeEvent.layout.width,
             height: event.nativeEvent.layout.height,
           });
         }
       }}
-      style={[styles.itemParent, { height, width, backgroundColor }, style]}
+      style={[
+        styles.itemParent,
+        { height, width, backgroundColor },
+        style,
+        animatedStyleParent,
+      ]}
     >
-      <Animated.View
-        onLayout={(event) => {
-          if (
-            gradientDimensions.width === -1 &&
-            gradientDimensions.height === -1
-          ) {
-            setGradientDimensions({
-              width: event.nativeEvent.layout.width,
-              height: event.nativeEvent.layout.height,
-            });
-          }
-        }}
-        style={[
-          styles.gradientParent,
-          isXDirectionAnimation && animatedStyleX,
-          isXDirectionAnimation && { height: "100%", width: "80%" },
-          isYDirectionAnimation && animatedStyleY,
-          isYDirectionAnimation && { height: "80%", width: "100%" },
-        ]}
-      >
-        <LinearGradient
-          colors={[
-            "rgba(255,255,255,0)",
-            "rgba(255,255,255,0.1)",
-            "rgba(255,255,255,0.4)",
-            "rgba(255,255,255,0.6)",
-            "rgba(255,255,255,0.7)",
-            "rgba(255,255,255,0.6)",
-            "rgba(255,255,255,0.4)",
-            "rgba(255,255,255,0.1)",
-            "rgba(255,255,255,0)",
+      {animationType === ANIMATION_TYPE.shiver ? (
+        <Animated.View
+          onLayout={(event) => {
+            if (
+              gradientDimensions.width === -1 &&
+              gradientDimensions.height === -1
+            ) {
+              setGradientDimensions({
+                width: event.nativeEvent.layout.width,
+                height: event.nativeEvent.layout.height,
+              });
+            }
+          }}
+          style={[
+            isXDirectionAnimation && animatedStyleX,
+            isXDirectionAnimation && {
+              height: "100%",
+              width: "80%",
+            },
+            isYDirectionAnimation && animatedStyleY,
+            isYDirectionAnimation && { height: "80%", width: "100%" },
           ]}
-          style={styles.background}
-          start={coordinates.start}
-          end={coordinates.end}
-        />
-      </Animated.View>
-    </View>
+        >
+          <LinearGradient
+            colors={[
+              "rgba(255,255,255,0)",
+              "rgba(255,255,255,0.1)",
+              "rgba(255,255,255,0.4)",
+              "rgba(255,255,255,0.6)",
+              "rgba(255,255,255,0.7)",
+              "rgba(255,255,255,0.6)",
+              "rgba(255,255,255,0.4)",
+              "rgba(255,255,255,0.1)",
+              "rgba(255,255,255,0)",
+            ]}
+            style={styles.background}
+            start={coordinates.start}
+            end={coordinates.end}
+          />
+        </Animated.View>
+      ) : null}
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   itemParent: {
-    height: 100,
-    width: "85%",
-    zIndex: 1000,
     overflow: "hidden",
-  },
-  gradientParent: {
-    zIndex: 100,
   },
   background: {
     height: "100%",
     width: "100%",
-    zIndex: 100,
   },
 });
