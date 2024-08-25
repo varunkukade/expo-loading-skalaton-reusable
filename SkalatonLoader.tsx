@@ -136,7 +136,8 @@ export const SkalatonLoader = ({
         ? leftMostEnd
         : rightMostEnd;
     translatex.value = withRepeat(
-      withSequence(
+      withDelay(
+        800, //Delay before the next iteration of animation starts
         withTiming(
           direction === ANIMATION_DIRECTION.leftToRight
             ? rightMostEnd
@@ -145,16 +146,9 @@ export const SkalatonLoader = ({
             duration: 500,
             easing: Easing.linear,
           }
-        ),
-        withDelay(
-          800, // Delay before the next iteration of animation starts
-          withTiming(0, {
-            duration: 0,
-          })
         )
       ),
-      -1, // Repeat inifinite times
-      false // Do not reverse the animation
+      -1
     );
   };
 
