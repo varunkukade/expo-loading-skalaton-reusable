@@ -7,10 +7,11 @@ This repository demonstrates a code to create a reusable component of the loadin
 	• Added a reusable component for pulse and shiver animation.
 
 Pulse animation:
-![1_kpGrGv8SX80ngoN6pWBtGA](https://github.com/user-attachments/assets/53e2de88-3930-497d-a3c7-da2714cd8bbe)
+https://github.com/user-attachments/assets/53e2de88-3930-497d-a3c7-da2714cd8bbe
 
 Shiver animation:
-![1_kpGrGv8SX80ngoN6pWBtGA](https://github.com/user-attachments/assets/a8d53ecc-68e8-4590-93e5-7a6ddcf29023)
+https://github.com/user-attachments/assets/49a1fe82-d03a-4b3d-a96c-514386caf61a
+
 
 
 
