@@ -3,6 +3,7 @@
 This repository demonstrates a code to create a reusable component of the loading skeleton which you can build once and use across your app. 
 
 	• Utilized expo for creating new react native project.
+        • This reusable code also used for bare react native project as logic remains same.
 	• Utilized expo-linear-gradient and react-native-reanimated v3 to create a loading skeleton.
 	• Added a reusable component for pulse and shiver animation.
 
