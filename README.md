@@ -10,7 +10,7 @@ Pulse animation:
 ![1_kpGrGv8SX80ngoN6pWBtGA](https://github.com/user-attachments/assets/53e2de88-3930-497d-a3c7-da2714cd8bbe)
 
 Shiver animation:
-https://github.com/user-attachments/assets/a8d53ecc-68e8-4590-93e5-7a6ddcf29023
+![1_kpGrGv8SX80ngoN6pWBtGA](https://github.com/user-attachments/assets/a8d53ecc-68e8-4590-93e5-7a6ddcf29023)
 
 
 
