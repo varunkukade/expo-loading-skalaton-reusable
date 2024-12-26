@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/53e2de88-3930-497d-a3c7-da2714cd8bbe
 Shiver animation:
 https://github.com/user-attachments/assets/49a1fe82-d03a-4b3d-a96c-514386caf61a
 
-
+I have also spinned off a library out of this reusable: https://github.com/varunkukade/react-native-skaleton-kit
 
 For a detailed explanation of this code, check out my Medium article:
 
